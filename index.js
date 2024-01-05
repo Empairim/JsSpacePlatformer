@@ -102,13 +102,13 @@ window.addEventListener("load", function () {
       }
       this.y += this.speedY;
       // Check if the player is off the top of the canvas
-      if (this.y < 0) {
-      this.y = 0;
-      }
-      // Check if the player is off the bottom of the canvas
-    else if (this.y + this.height > this.game.height) {
-      this.y = this.game.height - this.height;
-      }
+    //   if (this.y < 0) {
+    //   this.y = 0;
+    //   }
+    //   // Check if the player is off the bottom of the canvas
+    // else if (this.y + this.height > this.game.height) {
+    //   this.y = this.game.height - this.height;
+    // }
 
 
 
@@ -359,6 +359,14 @@ class Enemy1 extends Enemy {
       
     }
     collisionCheck(rect1,rect2){
+       // If rect1 is a projectile, adjust its x and y values
+  if (rect1 instanceof Projectile) {
+    rect1 = {
+      ...rect1,
+      x: rect1.x + 68,
+      y: rect1.y + 69,
+    };
+  } // this is so the projectile will be in the right position when checking for collision since I offset it above
       return(
         rect1.x < rect2.x + rect2.width &&
         rect1.x + rect1.width > rect2.x &&
