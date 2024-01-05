@@ -151,16 +151,16 @@ class Angler1 extends Enemy {
   class Background {
     constructor(game) {
       this.game = game
-      this.image1 = document.getElementById('sky')
+      this.image1 = document.getElementById('sky')//sky image1
       this.layer1 = new Layer(this.game, this.image1, .2)
-      this.image2 = document.getElementById('layer1')
-      this.image3 = document.getElementById('layer2')
-      this.image4 = document.getElementById('layer3')
-      this.image5 = document.getElementById('layer4')
-      this.layer2 = new Layer(this.game, this.image2, 1.5)
-      this.layer3 = new Layer(this.game, this.image3, 1)
-      this.layer4 = new Layer(this.game, this.image4, 1)
-      this.layer5 = new Layer(this.game, this.image5, 1)
+      this.image2 = document.getElementById('layer1')//city image2
+      this.image3 = document.getElementById('layer2')//creeps image3
+      this.image4 = document.getElementById('layer3')//clouds image4
+      this.image5 = document.getElementById('layer4')//trees image5
+      this.layer2 = new Layer(this.game, this.image2, .4)
+      this.layer3 = new Layer(this.game, this.image3, .5)
+      this.layer4 = new Layer(this.game, this.image4, 2)
+      this.layer5 = new Layer(this.game, this.image5, 3.5)
       this.layers = [this.layer1, this.layer2, this.layer3, this.layer4, this.layer5]
   }
   update(){
