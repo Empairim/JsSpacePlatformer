@@ -126,10 +126,52 @@ class Angler1 extends Enemy {
 
 
 }
-  //LAYER CLASS
-  class Layer {}
+   //LAYER CLASS
+  class Layer {
+    constructor(game, image, speedModifier) {
+      this.game = game
+      this.image = image
+      this.speedModifier = speedModifier
+      this.width = 1768;
+      this.height = 500;
+      this.x = 0
+      this.y = 0
+  }
+  update(){
+    this.x -= this.game.speed * this.speedModifier;
+    if (this.x <= -this.width) this.x = 0;
+  } // thius is so the background will move to the left and loop back to the start of the image
+  draw(context) {
+    context.drawImage(this.image, this.x, this.y);
+    context.drawImage(this.image, this.x + this.width, this.y);
+    // this is so the image will loop back to the start of the image when it reaches the end
+  }
+}
   //BACKGROUND CLASS
-  class Background {}
+  class Background {
+    constructor(game) {
+      this.game = game
+      this.image1 = document.getElementById('sky')
+      this.layer1 = new Layer(this.game, this.image1, .2)
+      this.image2 = document.getElementById('layer1')
+      this.image3 = document.getElementById('layer2')
+      this.image4 = document.getElementById('layer3')
+      this.image5 = document.getElementById('layer4')
+      this.layer2 = new Layer(this.game, this.image2, 1.5)
+      this.layer3 = new Layer(this.game, this.image3, 1)
+      this.layer4 = new Layer(this.game, this.image4, 1)
+      this.layer5 = new Layer(this.game, this.image5, 1)
+      this.layers = [this.layer1, this.layer2, this.layer3, this.layer4, this.layer5]
+  }
+  update(){
+    this.layers.forEach(layer => layer.update())
+  }
+  draw(context){
+    this.layers.forEach(layer => layer.draw(context))
+
+  }
+
+}
   //UI CLASS
   class UI {
     constructor(game) {
@@ -179,6 +221,7 @@ class Angler1 extends Enemy {
     constructor(width, height) {
       this.width = width;
       this.height = height;
+      this.background = new Background(this)
       this.player = new Player(this); // This allows you to have multiple instances of the Game class, each with its own set of players, and they won't interfere with each other.
       this.input = new InputHandler(this);
       this.ui = new UI(this);
@@ -194,11 +237,13 @@ class Angler1 extends Enemy {
       this.score = 0
       this.winningScore = 10
       this.gameTime = 0
-      this.timeLimit = 30000
+      this.timeLimit = 10000 //10 seconds
+      this.speed = 1
     }
     update(deltaTime) {
       if (!this.gameOver) this.gameTime += deltaTime
       if (this.gameTime > this.timeLimit) this.gameOver = true
+      this.background.update()
       this.player.update();
       if(this.ammoTimer > this.ammoInterval){
         if(this.ammo < this.maxAmmo) this.ammo++
@@ -237,6 +282,7 @@ class Angler1 extends Enemy {
         }
     }
     draw(context) {
+      this.background.draw(context)
       this.player.draw(context); //it take this param above so has to here
       this.ui.draw(context);
       this.enemies.forEach((enemy) => {
