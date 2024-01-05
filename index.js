@@ -13,11 +13,11 @@ window.addEventListener("load", function () {
       window.addEventListener("keydown", (event) => {
         //so key is only added once to keys array
         if (
-          (event.key === "ArrowUp" || event.key === "ArrowDown") &&
+          (event.key === "ArrowUp" || event.key === "ArrowDown" || event.keyCode === 32 ) &&
           this.game.keys.indexOf(event.key) === -1
         ) {
           this.game.keys.push(event.key);
-        } else if (event.key === " ") {
+        }  if (event.key === " ") {
           //spacebar
           this.game.player.shootTop();
         }
@@ -46,8 +46,8 @@ window.addEventListener("load", function () {
       if (this.x > this.game.width * 0.8) this.markedForDeletion = true;
     }
     draw(context) {
-      context.fillStyle = "red";
-      context.fillRect(this.x, this.y, this.width, this.height);
+      context.fillStyle = "lime";
+      context.fillRect(this.x+68, this.y+69, this.width, this.height);
     }
   }
   // PARTICLE CLASS
@@ -57,19 +57,62 @@ window.addEventListener("load", function () {
     constructor(game) {
       this.game = game;
       this.width = 120;
-      this.height = 190;
+      this.height = 200;
       this.x = 20;
       this.y = 100;
+      this.frameX = 0;
+      this.frameY = 0;
       this.speedY = 0; //vertical movement
       this.maxSpeed = 5;
       this.projectiles = [];
+      this.images = {
+        idle: document.getElementById("player"),
+        attack: document.getElementById("playerAttack"),
+
+        up: document.getElementById("playerUp"),
+        down: document.getElementById("playerDown"),
+      
+      
+      
+      }// this is so we can change the image of the player when moving up and down and shooting
+      this.image = this.images.idle
+      this.frameCount = 0;
+      this.isAttacking = false;
     }
     update() {
-      if (this.game.keys.includes("ArrowUp")) this.speedY = -this.maxSpeed;
-      else if (this.game.keys.includes("ArrowDown"))
+
+      // handling player animation
+      if (this.game.keys.includes("ArrowUp")) {
+        this.speedY = -this.maxSpeed;
+        this.image = this.images.up;
+        this.isAttacking = false;
+      } else if (this.game.keys.includes("ArrowDown")) {
         this.speedY = this.maxSpeed;
-      else this.speedY = 0;
+        this.image = this.images.down;
+        this.isAttacking = false;
+      } else if (this.game.keys.includes(" ")) {
+        this.image = this.images.attack;
+        this.isAttacking = true;
+        this.frameX = 2; // Go to the 2nd to last frame of the attack animation
+      } else {
+        this.speedY = 0;
+        this.image = this.images.idle;
+        if (!this.isAttacking) {
+        this.frameX = 0;} //resets to idle
+      }
       this.y += this.speedY;
+      // Check if the player is off the top of the canvas
+      if (this.y < 0) {
+      this.y = 0;
+      }
+      // Check if the player is off the bottom of the canvas
+    else if (this.y + this.height > this.game.height) {
+      this.y = this.game.height - this.height;
+      }
+
+
+
+
       // handling projectiles
       this.projectiles.forEach((projectile) => {
         projectile.update();
@@ -77,10 +120,30 @@ window.addEventListener("load", function () {
       this.projectiles = this.projectiles.filter(
         (projectile) => !projectile.markedForDeletion
       );
+        // Update the frameX value every X frames to cycle through the sprite sheet
+    if (this.frameCount % 5 === 0 ) {
+      this.frameX = (this.frameX + 1) % 4; // Assuming there are 4 frames in each sprite sheet
+    }
+
+    if (this.isAttacking && this.frameX === 3) { 
+      this.isAttacking = false;
+    }
+    this.frameCount++;
     }
     draw(context) {
       context.fillStyle = "black";
-      context.fillRect(this.x, this.y, this.width, this.height);
+      if (this.image === this.images.idle) {
+        // Draw the idle image by selecting a frame
+        let frameWidth = this.image.width / 5.98; // Replace 4 with the number of frames in the idle image
+        context.drawImage(this.image, this.frameX * frameWidth, 0, frameWidth, this.image.height, this.x, this.y, this.width, this.height);
+      }
+       else {
+        // Draw the other images by selecting a frame
+        context.drawImage(this.image, this.frameX * 192, 0, 192, 192, this.x, this.y, this.width, this.height);
+      }
+
+
+      // handling projectiles
       this.projectiles.forEach((projectile) => {
         projectile.draw(context);
       });
@@ -116,35 +179,35 @@ window.addEventListener("load", function () {
   }
 }
 //to inherit from enemy class
-class Angler1 extends Enemy {
+class Enemy1 extends Enemy {
   constructor(game) {
     super(game); //this will inherit all the properties from the enemy class combines the two classes properties together
     this.width = 228 / 5;
     this.height = 169 / 5;
-    this.y = Math.random() * (this.game.height * 0.9 - this.height); //random y position on screen but not off screen so * .9 and - height of the Angler1
+    this.y = Math.random() * (this.game.height * 0.9 - this.height); //random y position on screen but not off screen so * .9 and - height of the Enemy1
   }
 
 
 }
    //LAYER CLASS
   class Layer {
-    constructor(game, image, speedModifier) {
+    constructor(game, image, speedModifier, initialY = 0) {
       this.game = game
       this.image = image
       this.speedModifier = speedModifier
       this.width = 1768;
       this.height = 500;
       this.x = 0
-      this.y = 0
+      this.y = initialY || 0 // to pass unique y position for each layer if needed
   }
   update(){
     this.x -= this.game.speed * this.speedModifier;
     if (this.x <= -this.width) this.x = 0;
-  } // thius is so the background will move to the left and loop back to the start of the image
+  } // this is so the background will move to the left and loop back to the start of the image
   draw(context) {
     context.drawImage(this.image, this.x, this.y);
     context.drawImage(this.image, this.x + this.width, this.y);
-    // this is so the image will loop back to the start of the image when it reaches the end
+    // this is so the image will loop back to the start of the image when it reaches the end looks seemless
   }
 }
   //BACKGROUND CLASS
@@ -152,7 +215,7 @@ class Angler1 extends Enemy {
     constructor(game) {
       this.game = game
       this.image1 = document.getElementById('sky')//sky image1
-      this.layer1 = new Layer(this.game, this.image1, .2)
+      this.layer1 = new Layer(this.game, this.image1, .2 , -550)
       this.image2 = document.getElementById('layer1')//city image2
       this.image3 = document.getElementById('layer2')//creeps image3
       this.image4 = document.getElementById('layer3')//clouds image4
@@ -161,7 +224,7 @@ class Angler1 extends Enemy {
       this.layer3 = new Layer(this.game, this.image3, .5)
       this.layer4 = new Layer(this.game, this.image4, 2)
       this.layer5 = new Layer(this.game, this.image5, 3.5)
-      this.layers = [this.layer1, this.layer2, this.layer3, this.layer4, this.layer5]
+      this.layers = [this.layer1, this.layer2, this.layer3, this.layer5]
   }
   update(){
     this.layers.forEach(layer => layer.update())
@@ -237,13 +300,14 @@ class Angler1 extends Enemy {
       this.score = 0
       this.winningScore = 10
       this.gameTime = 0
-      this.timeLimit = 10000 //10 seconds
+      this.timeLimit = 30000 //30 seconds
       this.speed = 1
     }
     update(deltaTime) {
       if (!this.gameOver) this.gameTime += deltaTime
       if (this.gameTime > this.timeLimit) this.gameOver = true
       this.background.update()
+      this.background.layer4.update()// because the clouds are on top of everything else
       this.player.update();
       if(this.ammoTimer > this.ammoInterval){
         if(this.ammo < this.maxAmmo) this.ammo++
@@ -288,9 +352,10 @@ class Angler1 extends Enemy {
       this.enemies.forEach((enemy) => {
         enemy.draw(context);
       });
+      this.background.layer4.draw(context) // this is so the clouds will be drawn on top of the everything else
     }
     addEnemy() {
-      this.enemies.push(new Angler1(this));
+      this.enemies.push(new Enemy1(this));
       
     }
     collisionCheck(rect1,rect2){
