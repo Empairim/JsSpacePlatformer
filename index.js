@@ -146,6 +146,23 @@ class Angler1 extends Enemy {
       for (let i = 0;i < this.game.ammo;i++){
         context.fillRect(20+ 5 * i, 50, 3, 20)
       }
+      // game over message
+      if (this.game.gameOver){
+        context.textAlign = "center"
+        let message1
+        let message2
+        if (this.game.score >= this.game.winningScore){
+          message1 = "You Win!"
+          message2 = "Well Done!"
+        }else {
+          message1 = "Game Over"
+          message2 = "Try Again?"
+        }
+        context.font =  '50px ' + this.fontFamily
+        context.fillText(message1, this.game.width/2, this.game.height/2)
+        context.font =  '25px ' + this.fontFamily
+        context.fillText(message2, this.game.width/2, this.game.height/2)
+      }
       context.restore() // restores the state of the canvas
     }
   }
@@ -183,13 +200,14 @@ class Angler1 extends Enemy {
         } 
         this.player.projectiles.forEach((projectile) => {
           if (this.collisionCheck(projectile, enemy)) {
-            enemylives--
-            enemy.markedForDeletion = true;
-            if(enemylives === 0){
+            enemy.lives--;
+            
+            if(enemy.lives === 0){
               enemy.markedForDeletion = true;
               this.score += enemy.score
-              if(this.score === this.winningScore){
+              if(this.score >= this.winningScore){
                 this.gameOver = true
+                //
               }
             }
           }
