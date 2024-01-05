@@ -29,6 +29,7 @@ window.addEventListener("load", function () {
       });
     }
   }
+  // PROJECTILE CLASS
   class Projectile {
     constructor(game, x, y) {
       this.game = game;
@@ -49,7 +50,9 @@ window.addEventListener("load", function () {
       context.fillRect(this.x, this.y, this.width, this.height);
     }
   }
+  // PARTICLE CLASS
   class Particle {}
+  //PLAYER CLASS
   class Player {
     constructor(game) {
       this.game = game;
@@ -89,6 +92,7 @@ window.addEventListener("load", function () {
      }
     }
   }
+  //ENEMY CLASS
   class Enemy {
     constructor(game) {
       this.game = game;
@@ -122,8 +126,11 @@ class Angler1 extends Enemy {
 
 
 }
+  //LAYER CLASS
   class Layer {}
+  //BACKGROUND CLASS
   class Background {}
+  //UI CLASS
   class UI {
     constructor(game) {
       this.game = game;
@@ -139,14 +146,15 @@ class Angler1 extends Enemy {
       context.shadowOffsetY = 2;
       context.shadowColor = "black";
       context.font = `${this.fontSize}px ${this.fontFamily}`;
-      //draw score
+      //        draw score
       context.fillText('Score: ' + this.game.score, 20, 40);
-      //draw ammo
-      
+      //      draw ammo
       for (let i = 0;i < this.game.ammo;i++){
         context.fillRect(20+ 5 * i, 50, 3, 20)
       }
-      // game over message
+      //        draw time
+      context.fillText('Time: ' + Math.floor(this.game.gameTime/1000), this.game.width/2, 40);
+      //        draw  game over message
       if (this.game.gameOver){
         context.textAlign = "center"
         let message1
@@ -159,13 +167,14 @@ class Angler1 extends Enemy {
           message2 = "Try Again?"
         }
         context.font =  '50px ' + this.fontFamily
-        context.fillText(message1, this.game.width/2, this.game.height/2)
+        context.fillText(message1, this.game.width/2, this.game.height/2 - 40)
         context.font =  '25px ' + this.fontFamily
-        context.fillText(message2, this.game.width/2, this.game.height/2)
+        context.fillText(message2, this.game.width/2, this.game.height/2 + 40)
       }
       context.restore() // restores the state of the canvas
     }
   }
+  //GAME CLASS
   class Game {
     constructor(width, height) {
       this.width = width;
@@ -184,8 +193,12 @@ class Angler1 extends Enemy {
       this.gameOver = false;
       this.score = 0
       this.winningScore = 10
+      this.gameTime = 0
+      this.timeLimit = 30000
     }
     update(deltaTime) {
+      if (!this.gameOver) this.gameTime += deltaTime
+      if (this.gameTime > this.timeLimit) this.gameOver = true
       this.player.update();
       if(this.ammoTimer > this.ammoInterval){
         if(this.ammo < this.maxAmmo) this.ammo++
@@ -202,12 +215,12 @@ class Angler1 extends Enemy {
           if (this.collisionCheck(projectile, enemy)) {
             enemy.lives--;
             
-            if(enemy.lives === 0){
+            if(enemy.lives <= 0){
               enemy.markedForDeletion = true;
-              this.score += enemy.score
+              if(!this.gameOver)this.score += enemy.score
               if(this.score >= this.winningScore){
                 this.gameOver = true
-                //
+                
               }
             }
           }
@@ -243,6 +256,7 @@ class Angler1 extends Enemy {
       )
     }
   }
+  // create new instance of game class
   const game = new Game(canvas.width, canvas.height);
   let lastTime = 0
   // animation/game loop
