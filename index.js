@@ -96,6 +96,7 @@ window.addEventListener("load", function () {
   class Player {
     constructor(game) {
       this.game = game;
+      this.health = 100;
       this.width = 120;
       this.height = 200;
       this.x = 20;
@@ -103,7 +104,7 @@ window.addEventListener("load", function () {
       this.frameX = 0;
       this.frameY = 0;
       this.speedY = 0; //vertical movement
-      this.maxSpeed = 5;
+      this.maxSpeed = 8;
       this.projectiles = [];
       this.images = {
         idle: document.getElementById("player"),
@@ -193,7 +194,7 @@ window.addEventListener("load", function () {
     constructor(game) {
       this.game = game;
       this.x = this.game.width;
-      this.speedX = Math.random() * -1.5 - .5; //move to left
+      this.speedX = Math.random() * -15.5 - .5; //move to left
       this.markedForDeletion = false;
       this.lives = 20
       this.score = this.lives
@@ -309,7 +310,7 @@ class Enemy1 extends Enemy {
       context.fillStyle = this.color;
       context.shadowOffsetX = 2;
       context.shadowOffsetY = 2;
-      context.shadowColor = "black";
+      context.shadowColor = "red";
       context.font = `${this.fontSize}px ${this.fontFamily}`;
       //        draw score
       context.fillText('Score: ' + this.game.score, 20, 40);
@@ -335,7 +336,13 @@ class Enemy1 extends Enemy {
         context.fillText(message1, this.game.width/2, this.game.height/2 - 40)
         context.font =  '25px ' + this.fontFamily
         context.fillText(message2, this.game.width/2, this.game.height/2 + 40)
+       
+       
       }
+      context.fillStyle = "white";
+      context.font = "20px Helvetica";
+      context.fillText('Health: ' + this.game.player.health, 20, 100);
+      //
       context.restore() // restores the state of the canvas
     }
   }
@@ -352,16 +359,15 @@ class Enemy1 extends Enemy {
       this.enemies = [];
       this.particles = []
       this.enemyTimer = 0;
-      this.enemyInterval = 1000;//1 second
-      this.ammo = 20
+      this.enemyInterval = 500;//1 second
       this.maxAmmo = 50
       this.ammoTimer = 0
-      this.ammoInterval = 500;//.5 second
+      this.ammoInterval = 1000;//1 second
       this.gameOver = false;
       this.score = 0
-      this.winningScore = 100
+      this.winningScore = 1000
       this.gameTime = 0
-      this.timeLimit = 600000 //10 minutes
+      this.timeLimit = 45000 //45 seconds
       this.speed = 1
     }
     update(deltaTime) {
@@ -370,6 +376,7 @@ class Enemy1 extends Enemy {
       this.background.update()
       this.background.layer4.update()// because the clouds are on top of everything else
       this.player.update();
+      if (this.player.health <= 0) this.gameOver = true;
       if(this.ammoTimer > this.ammoInterval){
         if(this.ammo < this.maxAmmo) this.ammo++
         this.ammoTimer = 0 //reset timer and the above if statement will add ammo if less than max
@@ -384,6 +391,7 @@ class Enemy1 extends Enemy {
         enemy.update();
         if (this.collisionCheck(this.player, enemy)){
           enemy.markedForDeletion = true;
+          this.player.health -= 10 //player loses health when hit;
           for(let i =0; i < 10; i++){
             this.particles.push(new Particle(this, enemy.x + enemy.width * .5, enemy.y + enemy.height * .5))
           }
