@@ -13,12 +13,12 @@ window.addEventListener("load", function () {
       window.addEventListener("keydown", (event) => {
         //so key is only added once to keys array
         if (
-          (event.key === "ArrowUp" || event.key === "ArrowDown" || event.keyCode === 32 ) &&
+          (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "ArrowRight" ) &&
           this.game.keys.indexOf(event.key) === -1
         ) {
           this.game.keys.push(event.key);
-        }  if (event.key === " ") {
-          //spacebar
+        }  if (event.key === "ArrowRight") {
+          //shoot
           this.game.player.shootTop();
         }
       });
@@ -35,9 +35,9 @@ window.addEventListener("load", function () {
       this.game = game;
       this.x = x;
       this.y = y;
-      this.width = 20;
+      this.width = 50;
       this.height = 3;
-      this.speed = 3;
+      this.speed = 10;
       this.markedForDeletion = false;
       this.image = new Image();
     }
@@ -81,7 +81,7 @@ window.addEventListener("load", function () {
     }
     update() {
 
-      // handling player animation
+      // handling player animation/ movement
       if (this.game.keys.includes("ArrowUp")) {
         this.speedY = -this.maxSpeed;
         this.image = this.images.up;
@@ -90,10 +90,10 @@ window.addEventListener("load", function () {
         this.speedY = this.maxSpeed;
         this.image = this.images.down;
         this.isAttacking = false;
-      } else if (this.game.keys.includes(" ")) {
+      } else if (this.game.keys.includes("ArrowRight")) {
         this.image = this.images.attack;
         this.isAttacking = true;
-        this.frameX = 2; // Go to the 2nd to last frame of the attack animation
+        
       } else {
         this.speedY = 0;
         this.image = this.images.idle;
@@ -101,14 +101,7 @@ window.addEventListener("load", function () {
         this.frameX = 0;} //resets to idle
       }
       this.y += this.speedY;
-      // Check if the player is off the top of the canvas
-    //   if (this.y < 0) {
-    //   this.y = 0;
-    //   }
-    //   // Check if the player is off the bottom of the canvas
-    // else if (this.y + this.height > this.game.height) {
-    //   this.y = this.game.height - this.height;
-    // }
+
 
 
 
@@ -164,16 +157,22 @@ window.addEventListener("load", function () {
       this.markedForDeletion = false;
       this.lives = 5
       this.score = this.lives
+      this.frameX = 0;
+      this.frameY = 0;
+      this.maxFrame = 37;
 
     }
     update() {
       this.x += this.speedX; //move from right to left
       if (this.x +this.width < 0) this.markedForDeletion = true;  //if off screen
+      if(this.frameX < this.maxFrame){
+        this.frameX++
+      }else this.frameX = 0
     }
     draw(context) {
-      context.fillStyle = "aqua";
-      context.fillRect(this.x, this.y, this.width, this.height);
-      context.fillStyle = "black";
+      
+      // context.strokeRect(this.x, this.y, this.width, this.height);
+      context.drawImage(this.image, this.frameX * this.width , this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height);
       context.font = "30px Helvetica";
       context.fillText(this.lives, this.x, this.y)
   }
@@ -182,9 +181,11 @@ window.addEventListener("load", function () {
 class Enemy1 extends Enemy {
   constructor(game) {
     super(game); //this will inherit all the properties from the enemy class combines the two classes properties together
-    this.width = 228 / 5;
-    this.height = 169 / 5;
+    this.width = 228 ;
+    this.height = 169 ;
     this.y = Math.random() * (this.game.height * 0.9 - this.height); //random y position on screen but not off screen so * .9 and - height of the Enemy1
+    this.image = document.getElementById("enemy1");
+    this.frameY = Math.floor(Math.random() * 3); //random frameY position 
   }
 
 
@@ -220,8 +221,8 @@ class Enemy1 extends Enemy {
       this.image3 = document.getElementById('layer2')//creeps image3
       this.image4 = document.getElementById('layer3')//clouds image4
       this.image5 = document.getElementById('layer4')//trees image5
-      this.layer2 = new Layer(this.game, this.image2, .4)
-      this.layer3 = new Layer(this.game, this.image3, .5)
+      this.layer2 = new Layer(this.game, this.image2, 1)
+      this.layer3 = new Layer(this.game, this.image3, .5, -65)
       this.layer4 = new Layer(this.game, this.image4, 2)
       this.layer5 = new Layer(this.game, this.image5, 3.5)
       this.layers = [this.layer1, this.layer2, this.layer3, this.layer5]
@@ -298,9 +299,9 @@ class Enemy1 extends Enemy {
       this.ammoInterval = 500;//.5 second
       this.gameOver = false;
       this.score = 0
-      this.winningScore = 10
+      this.winningScore = 1000
       this.gameTime = 0
-      this.timeLimit = 30000 //30 seconds
+      this.timeLimit = 600000 //10 minutes
       this.speed = 1
     }
     update(deltaTime) {
@@ -366,7 +367,7 @@ class Enemy1 extends Enemy {
       x: rect1.x + 68,
       y: rect1.y + 69,
     };
-  } // this is so the projectile will be in the right position when checking for collision since I offset it above
+  } // this is so the projectile will be in the right position when checking for collision since I offset it above to he in the middle of the player
       return(
         rect1.x < rect2.x + rect2.width &&
         rect1.x + rect1.width > rect2.x &&
