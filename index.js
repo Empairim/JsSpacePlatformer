@@ -39,7 +39,7 @@ window.addEventListener("load", function () {
       this.height = 3;
       this.speed = 10;
       this.markedForDeletion = false;
-      this.image = new Image();
+      this.image = document.getElementById("projectile");
     }
     update() {
       this.x += this.speed;
@@ -51,7 +51,47 @@ window.addEventListener("load", function () {
     }
   }
   // PARTICLE CLASS
-  class Particle {}
+  class Particle {
+    constructor(game, x, y) {
+      this.game = game;
+      this.x = x;
+      this.y = y;
+      this.speed = 1;
+      this.image = document.getElementById("enemyDeath");
+      this.frameX = Math.floor(Math.random() * 3);
+      this.frameY = Math.floor(Math.random() * 3);
+      this.spriteSize = this.image.width / 3;
+      this.sizeModifier = Math.random() * 2 + 1;
+      this.size = this.spriteSize * this.sizeModifier;  //this is so the particles will be different sizes
+      this.speedX = Math.random() * 3 - 1;
+      this.speedY = Math.random() * -20  ; 
+      this.gravity = 0.5;
+      this.markedForDeletion = false;
+      this.angle = 0; //angle of rotation
+      this.va = Math.random() * 0.2 - 0.1; //velocity of angle
+      this.opacity = 1;
+    this.opacitySpeed = 0.01;
+
+    }
+    update() {
+      this.angle += this.va;
+      this.speedY += this.gravity; //makes the particles fall
+      this.x += this.speedX; //horizontal movement
+      this.y += this.speedY; //vertical movement
+      if (this.y > this.game.height + this.size || this.x < 0 -this.size) this.markedForDeletion = true; //if off screen
+      this.opacity -= this.opacitySpeed;
+      if (this.opacity < 0) this.opacity = 0;
+    }
+    draw(context) {
+      context.save(); // Save the current state of the context
+      context.translate(this.x + this.size / 2, this.y + this.size / 2); // Move the context to the particle's center
+      context.rotate(this.angle); // Rotate the context
+      context.globalAlpha = this.opacity; // Set the opacity
+      context.drawImage(this.image, this.frameX * this.spriteSize, this.frameY * this.spriteSize, this.spriteSize, this.spriteSize, -this.size / 2, -this.size / 2, this.size, this.size); // Draw the image centered on the particle's center
+      context.restore(); // Restore the context to its previous state
+    }
+
+  }
   //PLAYER CLASS
   class Player {
     constructor(game) {
@@ -155,24 +195,43 @@ window.addEventListener("load", function () {
       this.x = this.game.width;
       this.speedX = Math.random() * -1.5 - .5; //move to left
       this.markedForDeletion = false;
-      this.lives = 5
+      this.lives = 20
       this.score = this.lives
       this.frameX = 0;
       this.frameY = 0;
       this.maxFrame = 37;
+      this.isDead = false;
+    
+
 
     }
     update() {
-      this.x += this.speedX; //move from right to left
-      if (this.x +this.width < 0) this.markedForDeletion = true;  //if off screen
-      if(this.frameX < this.maxFrame){
-        this.frameX++
-      }else this.frameX = 0
+      this.x += this.speedX - this.game.speed; //move from right to left and speed up as game progresses if game.speed is increased
+  if (this.x +this.width < 0) this.markedForDeletion = true;  //if off screen
+  if(this.frameX < this.maxFrame){
+    this.frameX++
+  }else this.frameX = 0
+  if (this.lives <= 0) {
+    this.isDead = true;
+    // Increment the frame counter, but stop at the last frame
+    if (this.deathFrame < 59) {
+      this.deathFrame++;
+    } else {
+      // Only mark for deletion if the death animation has finished playing
+      this.markedForDeletion = true;
     }
+  }
+}
+    
     draw(context) {
-      
-      // context.strokeRect(this.x, this.y, this.width, this.height);
-      context.drawImage(this.image, this.frameX * this.width , this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height);
+      if (this.isDead) {
+        // Draw the death animation
+        context.drawImage(deathSpriteSheet, this.deathFrame * 108, 0, 108, 116, this.x, this.y, 108, 116);
+        // Increment the frame counter, looping back to 0 after the last frame
+        this.deathFrame = (this.deathFrame + 1) % 60;
+      } else {
+     
+      context.drawImage(this.image, this.frameX * this.width , this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height)}
       context.font = "30px Helvetica";
       context.fillText(this.lives, this.x, this.y)
   }
@@ -291,6 +350,7 @@ class Enemy1 extends Enemy {
       this.ui = new UI(this);
       this.keys = []; //saves all key presses and allows me to pass it to the player class as well
       this.enemies = [];
+      this.particles = []
       this.enemyTimer = 0;
       this.enemyInterval = 1000;//1 second
       this.ammo = 20
@@ -299,7 +359,7 @@ class Enemy1 extends Enemy {
       this.ammoInterval = 500;//.5 second
       this.gameOver = false;
       this.score = 0
-      this.winningScore = 1000
+      this.winningScore = 100
       this.gameTime = 0
       this.timeLimit = 600000 //10 minutes
       this.speed = 1
@@ -316,10 +376,17 @@ class Enemy1 extends Enemy {
       } else {
         this.ammoTimer += deltaTime
       } // this is so we can use the deltaTime in the update method to track ammo timer
+      this.particles.forEach((particle) => {
+        particle.update();
+      })
+      this.particles = this.particles.filter(particle => !particle.markedForDeletion)
       this.enemies.forEach((enemy) => {
         enemy.update();
         if (this.collisionCheck(this.player, enemy)){
           enemy.markedForDeletion = true;
+          for(let i =0; i < 10; i++){
+            this.particles.push(new Particle(this, enemy.x + enemy.width * .5, enemy.y + enemy.height * .5))
+          }
         } 
         this.player.projectiles.forEach((projectile) => {
           if (this.collisionCheck(projectile, enemy)) {
@@ -327,6 +394,7 @@ class Enemy1 extends Enemy {
             
             if(enemy.lives <= 0){
               enemy.markedForDeletion = true;
+                this.particles.push(new Particle(this, enemy.x + enemy.width * .5, enemy.y + enemy.height * .5))
               if(!this.gameOver)this.score += enemy.score
               if(this.score >= this.winningScore){
                 this.gameOver = true
@@ -336,9 +404,7 @@ class Enemy1 extends Enemy {
           }
         })
       });
-      this.enemies = this.enemies.filter(
-        (enemy) => !enemy.markedForDeletion
-      ); 
+      this.enemies = this.enemies.filter(enemy => !enemy.markedForDeletion || (enemy.markedForDeletion && enemy.isDead && enemy.deathFrame < 59));
         if(this.enemyTimer > this.enemyInterval && !this.gameOver){
           this.addEnemy();
           this.enemyTimer = 0 //reset timer
@@ -350,6 +416,7 @@ class Enemy1 extends Enemy {
       this.background.draw(context)
       this.player.draw(context); //it take this param above so has to here
       this.ui.draw(context);
+      this.particles.forEach((particle) => particle.draw(context))
       this.enemies.forEach((enemy) => {
         enemy.draw(context);
       });

@@ -16,6 +16,6 @@
   max-height: 100%;
 }
 
-#layer1,#layer2,#layer3,#layer4, #sky, #player, #playerAttack ,#playerUp, #playerDown, #enemy1{
+#layer1,#layer2,#layer3,#layer4, #sky, #player, #playerAttack ,#playerUp, #playerDown, #enemy1, #enemyDeath{
   display: none;
 }
