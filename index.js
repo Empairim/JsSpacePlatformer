@@ -363,7 +363,7 @@ class Enemy1 extends Enemy {
       this.ammo = 20
       this.maxAmmo = 50
       this.ammoTimer = 0
-      this.ammoInterval = 1000;//1 second
+      this.ammoInterval = 800;// .8 seconds
       this.gameOver = false;
       this.score = 0
       this.winningScore = 1000
