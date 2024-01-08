@@ -359,7 +359,8 @@ class Enemy1 extends Enemy {
       this.enemies = [];
       this.particles = []
       this.enemyTimer = 0;
-      this.enemyInterval = 500;//1 second
+      this.enemyInterval = 500;//.5 seconds
+      this.ammo = 20
       this.maxAmmo = 50
       this.ammoTimer = 0
       this.ammoInterval = 1000;//1 second
@@ -367,7 +368,7 @@ class Enemy1 extends Enemy {
       this.score = 0
       this.winningScore = 1000
       this.gameTime = 0
-      this.timeLimit = 45000 //45 seconds
+      this.timeLimit = 45000 //  45 seconds
       this.speed = 1
     }
     update(deltaTime) {
