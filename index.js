@@ -1,10 +1,52 @@
 // alot of files so gonna have a load function before running anything
 window.addEventListener("load", function () {
-  //canvas setup
+  //canvas setup SETTINGS
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
   canvas.width = 1500;
   canvas.height = 500;
+
+
+  let gameRunning = true;
+  let animationId;
+
+
+function startGame() {
+  if (animationId !== undefined) {
+    cancelAnimationFrame(animationId); // Cancel previous animation frame
+  }
+  animationId = requestAnimationFrame(animate);
+}
+
+  this.window.addEventListener("keydown", (event) => {
+    switch (event.key){
+      case 's': //start game
+      if (!gameRunning){
+        gameRunning = true;
+        animate(0)
+      }
+      break
+      case 'p': //pause game
+      if(gameRunning){
+        gameRunning = false;
+        cancelAnimationFrame(animationId)
+      }
+      break
+      case 'r': //restart game
+      game.reset()
+      gameRunning = true;
+      cancelAnimationFrame(animationId); // Cancel previous animation frame
+      animate(0)
+      break
+    }
+    
+  })
+
+
+
+
+
+
   
   // Improved version of my player handler from last game
   class InputHandler {
@@ -447,9 +489,23 @@ class Enemy1 extends Enemy {
       return(
         rect1.x < rect2.x + rect2.width &&
         rect1.x + rect1.width > rect2.x &&
-        rect1.y < rect2.y + rect2.height &&
-        rect1.y + rect1.height > rect2.y
+        rect1.y < rect2.y + rect2.height &&   
+        rect1.y + rect1.height > rect2.y  // this is so the collision will be detected on all sides of the enemy
       )
+        
+    }
+    reset(){
+      this.gameOver = false;
+      this.score = 0;
+      this.gameTime = 0;
+      this.player.health = 100;
+      this.player.projectiles = [];
+      this.enemies = [];
+      this.particles = [];
+      this.ammo = 20;
+      this.speed = 1;
+      this.player.x = 20;
+      this.player.y = 100;
     }
   }
   // create new instance of game class
@@ -462,8 +518,10 @@ class Enemy1 extends Enemy {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // will clear the canvas b4 loop
     game.update(deltaTime);
     game.draw(ctx); // this is telling where we want it drawn then passes it back to the game/player class draw methods
+    if (gameRunning){
+      animationId = requestAnimationFrame(animate);//this function has timeStamps built in
+    }
    
-    requestAnimationFrame(animate);//this function has timeStamps built in
   }
   animate(0);
 });
