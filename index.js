@@ -4,7 +4,7 @@ window.addEventListener("load", function () {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
   canvas.width = 1500;
-  canvas.height = 500;
+  canvas.height = 800;
 
   
   let gameRunning = false;
@@ -295,15 +295,15 @@ class Enemy1 extends Enemy {
     constructor(game) {
       this.game = game
       this.image1 = document.getElementById('sky')//sky image1
-      this.layer1 = new Layer(this.game, this.image1, .2 , -550)
+      this.layer1 = new Layer(this.game, this.image1, .2 , 0)
       this.image2 = document.getElementById('layer1')//city image2
       this.image3 = document.getElementById('layer2')//creeps image3
       this.image4 = document.getElementById('layer3')//clouds image4
       this.image5 = document.getElementById('layer4')//trees image5
-      this.layer2 = new Layer(this.game, this.image2, 1)
-      this.layer3 = new Layer(this.game, this.image3, .5, -65)
-      this.layer4 = new Layer(this.game, this.image4, 2)
-      this.layer5 = new Layer(this.game, this.image5, 3.5)
+      this.layer2 = new Layer(this.game, this.image2, 1, 175)
+      this.layer3 = new Layer(this.game, this.image3, .5, 200)
+      this.layer4 = new Layer(this.game, this.image4, 3, )
+      this.layer5 = new Layer(this.game, this.image5, 3.5, -200)
       this.layers = [this.layer1, this.layer2, this.layer3, this.layer5]
   }
   update(){
