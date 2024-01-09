@@ -119,7 +119,7 @@ function startGame() {
       this.width = 250;
       this.height = 200;
       this.collisionWidth = 70; // Width of the collision rectangle
-    this.collisionHeight = 55; // Height of the collision rectangle
+      this.collisionHeight = 55; // Height of the collision rectangle
     
       this.x = 20;
       this.y = 100;
@@ -129,7 +129,7 @@ function startGame() {
       this.frameX = 0;
       this.frameY = 0;
       this.speedY = 0; //vertical movement
-      this.maxSpeed = 8;
+      this.maxSpeed = 9.7;
       this.projectiles = [];
       this.images = {
         idle: document.getElementById("player"),
@@ -213,9 +213,9 @@ function startGame() {
       if (this.image === this.images.idle) {
         // Draw the idle image by selecting a frame
         let frameWidth = this.image.width / 5.98; // Replace 4 with the number of frames in the idle image
-        context.strokeStyle = 'red'; // Set the color of the rectangle
-        // context.strokeRect(this.x, this.y, this.width, this.height); // Draw the rectangle
-        context.strokeRect(this.collisionX, this.collisionY, this.collisionWidth, this.collisionHeight); // Draw the rectangle
+        // context.strokeStyle = 'red'; // Set the color of the rectangle
+        // // context.strokeRect(this.x, this.y, this.width, this.height); // Draw the rectangle
+        // context.strokeRect(this.collisionX, this.collisionY, this.collisionWidth, this.collisionHeight); // Draw the rectangle for collision detection testing
         context.drawImage(this.image, this.frameX * frameWidth, 0, frameWidth, this.image.height, this.x, this.y, this.width, this.height);
       }
        else {
@@ -241,7 +241,7 @@ function startGame() {
     constructor(game) {
       this.game = game;
       this.x = this.game.width;
-      this.speedX = Math.random() * -15.5 - .5; //move to left
+      this.speedX = Math.random() * -25.5 - .5; //move to left
       this.markedForDeletion = false;
       this.lives = 20
       this.score = this.lives
@@ -278,8 +278,8 @@ function startGame() {
         // Increment the frame counter, looping back to 0 after the last frame
         this.deathFrame = (this.deathFrame + 1) % 60;
       } else {
-        context.strokeStyle = 'blue'; // Set the color of the rectangle
-        context.strokeRect(this.x, this.y, this.width, this.height);
+        // context.strokeStyle = 'blue'; // Set the color of the rectangle
+        // context.strokeRect(this.x, this.y, this.width, this.height); // Draw the rectangle for testing
       context.drawImage(this.image, this.frameX * this.width , this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height)}
       context.font = "30px Helvetica";
       context.fillText(this.lives, this.x, this.y)
@@ -430,7 +430,7 @@ class Health extends Enemy {
       this.ammo = 20
       this.maxAmmo = 50
       this.ammoTimer = 0
-      this.ammoInterval = 800;// .8 seconds
+      this.ammoInterval = 1000; //1 second
       this.gameOver = false;
       this.score = 0
       this.winningScore = 1000
