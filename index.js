@@ -66,7 +66,7 @@ function startGame() {
     }
     draw(context) {
       context.fillStyle = "lime";
-      context.fillRect(this.x+68, this.y+69, this.width, this.height);
+      context.fillRect(this.x+100, this.y+69, this.width, this.height);
     }
   }
   // PARTICLE CLASS
@@ -116,10 +116,16 @@ function startGame() {
     constructor(game) {
       this.game = game;
       this.health = 100;
-      this.width = 120;
+      this.width = 250;
       this.height = 200;
+      this.collisionWidth = 70; // Width of the collision rectangle
+    this.collisionHeight = 55; // Height of the collision rectangle
+    
       this.x = 20;
       this.y = 100;
+      this.collisionX = this.x + (this.width - this.collisionWidth) / 2; // X position of the collision rectangle
+      this.collisionY = this.y + (this.height - this.collisionHeight) / 2; // Y position of the collision rectangle
+      
       this.frameX = 0;
       this.frameY = 0;
       this.speedY = 0; //vertical movement
@@ -141,6 +147,9 @@ function startGame() {
     }
     update() {
 
+      this.collisionX = this.x + (this.width - this.collisionWidth) / 2;
+      this.collisionY = this.y + (this.height - this.collisionHeight) / 2;
+     
       // handling player animation/ movement
       if (this.game.keys.includes("ArrowUp")) {
         this.speedY = -this.maxSpeed;
@@ -161,6 +170,22 @@ function startGame() {
         this.frameX = 0;} //resets to idle
       }
       this.y += this.speedY;
+      // Add event listener for mousemove event INSTEAD OF ARROW KEYS
+      // window.addEventListener('mousemove', (event) => {
+      //   // Update player's position based on mouse position
+      //   this.y = event.clientY;
+      // });
+
+      // // Update player animation/movement
+      // if (this.game.mouseButtonPressed) {
+      //   this.image = this.images.attack;
+      //   this.isAttacking = true;
+      // } else {
+      //   this.image = this.images.idle;
+      //   if (!this.isAttacking) {
+      //     this.frameX = 0; //resets to idle
+      //   }
+      // }
 
 
 
@@ -188,6 +213,9 @@ function startGame() {
       if (this.image === this.images.idle) {
         // Draw the idle image by selecting a frame
         let frameWidth = this.image.width / 5.98; // Replace 4 with the number of frames in the idle image
+        context.strokeStyle = 'red'; // Set the color of the rectangle
+        // context.strokeRect(this.x, this.y, this.width, this.height); // Draw the rectangle
+        context.strokeRect(this.collisionX, this.collisionY, this.collisionWidth, this.collisionHeight); // Draw the rectangle
         context.drawImage(this.image, this.frameX * frameWidth, 0, frameWidth, this.image.height, this.x, this.y, this.width, this.height);
       }
        else {
@@ -250,7 +278,8 @@ function startGame() {
         // Increment the frame counter, looping back to 0 after the last frame
         this.deathFrame = (this.deathFrame + 1) % 60;
       } else {
-     
+        context.strokeStyle = 'blue'; // Set the color of the rectangle
+        context.strokeRect(this.x, this.y, this.width, this.height);
       context.drawImage(this.image, this.frameX * this.width , this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height)}
       context.font = "30px Helvetica";
       context.fillText(this.lives, this.x, this.y)
@@ -266,9 +295,22 @@ class Enemy1 extends Enemy {
     this.image = document.getElementById("enemy1");
     this.frameY = Math.floor(Math.random() * 3); //random frameY position 
   }
-
-
 }
+
+class Health extends Enemy {
+    constructor(game) {
+      super(game);
+      this.width = 50;
+      this.height = 50;
+      this.y = Math.random() * (this.game.height * 0.9 - this.height);
+      this.image = document.getElementById("health");
+      this.frameY = Math.floor(Math.random() * 3); //random frameY position 
+    }
+    }
+  
+
+
+  
    //LAYER CLASS
   class Layer {
     constructor(game, image, speedModifier, initialY = 0) {
@@ -464,22 +506,32 @@ class Enemy1 extends Enemy {
       this.enemies.push(new Enemy1(this));
       
     }
-    collisionCheck(rect1,rect2){
-       // If rect1 is a projectile, adjust its x and y values
-  if (rect1 instanceof Projectile) {
-    rect1 = {
-      ...rect1,
-      x: rect1.x + 68,
-      y: rect1.y + 69,
-    };
-  } // this is so the projectile will be in the right position when checking for collision since I offset it above to he in the middle of the player
-      return(
-        rect1.x < rect2.x + rect2.width &&
-        rect1.x + rect1.width > rect2.x &&
-        rect1.y < rect2.y + rect2.height &&   
-        rect1.y + rect1.height > rect2.y  // this is so the collision will be detected on all sides of the enemy
-      )
-        
+    // !!!!!!COLLISION DETECTION!!!!
+    collisionCheck(rect1, rect2) {
+      // If rect1 is a projectile, adjust its x and y values
+      if (rect1 instanceof Projectile) {
+        rect1 = {
+          ...rect1,
+          x: rect1.x + 68,
+          y: rect1.y + 69,
+        };
+      }
+    
+      if (rect1 instanceof Player) {
+        return (
+          rect1.collisionX < rect2.x + rect2.width &&
+          rect1.collisionX + rect1.collisionWidth > rect2.x &&
+          rect1.collisionY < rect2.y + rect2.height &&   
+          rect1.collisionY + rect1.collisionHeight > rect2.y
+        );
+      } else {
+        return (
+          rect1.x < rect2.x + rect2.width &&
+          rect1.x + rect1.width > rect2.x &&
+          rect1.y < rect2.y + rect2.height &&   
+          rect1.y + rect1.height > rect2.y
+        );
+      }
     }
     reset(){
       this.gameOver = false;
