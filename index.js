@@ -355,15 +355,21 @@ class Enemy1 extends Enemy {
         context.fillText(message1, this.game.width/2, this.game.height/2 - 40)
         context.font =  '25px ' + this.fontFamily
         context.fillText(message2, this.game.width/2, this.game.height/2 + 40)
-       
+        context.textAlign = "left";
        
       }
       context.fillStyle = "white";
       context.font = "20px Helvetica";
       context.fillText('Health: ' + this.game.player.health, 20, 100);
       //
-      context.restore() // restores the state of the canvas
+      ctx.font = '20px Arial';
+      ctx.fillStyle = 'white';
+      ctx.fillText("Press 's' to start the game", 190, 40);
+      ctx.fillText("Press 'p' to pause/unpause the game", 190, 60);
+      ctx.fillText("Press 'r' to reset the game", 190, 80);
+      context.restore()// restores the canvas to the state before the save method above
     }
+    
   }
   //GAME CLASS
   class Game {
