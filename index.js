@@ -6,8 +6,8 @@ window.addEventListener("load", function () {
   canvas.width = 1500;
   canvas.height = 500;
 
-
-  let gameRunning = true;
+  
+  let gameRunning = false;
   let animationId;
 
 
@@ -18,30 +18,7 @@ function startGame() {
   animationId = requestAnimationFrame(animate);
 }
 
-  this.window.addEventListener("keydown", (event) => {
-    switch (event.key){
-      case 's': //start game
-      if (!gameRunning){
-        gameRunning = true;
-        animate(0)
-      }
-      break
-      case 'p': //pause game
-      if(gameRunning){
-        gameRunning = false;
-        cancelAnimationFrame(animationId)
-      }
-      break
-      case 'r': //restart game
-      game.reset()
-      gameRunning = true;
-      cancelAnimationFrame(animationId); // Cancel previous animation frame
-      animate(0)
-      break
-    }
-    
-  })
-
+  
 
 
 
@@ -413,9 +390,13 @@ class Enemy1 extends Enemy {
       this.timeLimit = 45000 //  45 seconds
       this.speed = 1
     }
-    update(deltaTime) {
-      if (!this.gameOver) this.gameTime += deltaTime
-      if (this.gameTime > this.timeLimit) this.gameOver = true
+    update(deltaTime, gameRunning) {
+      if (!this.gameOver) {
+        if (gameRunning) {
+          this.gameTime += deltaTime;
+        }
+        if (this.gameTime > this.timeLimit) this.gameOver = true;
+      }
       this.background.update()
       this.background.layer4.update()// because the clouds are on top of everything else
       this.player.update();
@@ -513,15 +494,49 @@ class Enemy1 extends Enemy {
   let lastTime = 0
   // animation/game loop
   function animate(timeStamp) {
-    const deltaTime = timeStamp - lastTime
-    lastTime = timeStamp // this is so we can use the deltaTime in the update method
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // will clear the canvas b4 loop
-    game.update(deltaTime);
-    game.draw(ctx); // this is telling where we want it drawn then passes it back to the game/player class draw methods
-    if (gameRunning){
-      animationId = requestAnimationFrame(animate);//this function has timeStamps built in
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (gameRunning) {
+      const deltaTime = timeStamp - lastTime;
+      lastTime = timeStamp;
+      game.update(deltaTime, gameRunning);
+      
+      animationId = requestAnimationFrame(animate);
+    } else {
+      lastTime = timeStamp; // Reset lastTime when game is paused
     }
-   
+    game.draw(ctx);
   }
+  // GAME CONTROLS
+    this.window.addEventListener("keydown", (event) => {
+      switch (event.key){
+        case 's': //start game
+        if (!gameRunning){
+          gameRunning = true;
+          animate(0)
+        }
+        break
+        case 'p': //pause game
+        if(gameRunning){
+          gameRunning = false;
+          cancelAnimationFrame(animationId)
+        } else {
+          gameRunning = true;
+          lastTime = performance.now(); // Reset lastTime when game is unpaused
+          animate(lastTime);
+        }
+        break
+        case 'r': //restart game
+        game.reset()
+        gameRunning = true;
+        cancelAnimationFrame(animationId); // Cancel previous animation frame
+        animate(0)
+        break
+      }
+      
+    })
+  
+  // start game
   animate(0);
 });
