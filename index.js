@@ -56,7 +56,7 @@ function startGame() {
       this.y = y;
       this.width = 50;
       this.height = 3;
-      this.speed = 10;
+      this.speed = 13; //bullet speed
       this.markedForDeletion = false;
       this.image = document.getElementById("projectile");
     }
@@ -430,7 +430,7 @@ class Health extends Enemy {
       this.ammo = 20
       this.maxAmmo = 50
       this.ammoTimer = 0
-      this.ammoInterval = 1000; //1 second
+      this.ammoInterval = 500; //.5 second
       this.gameOver = false;
       this.score = 0
       this.winningScore = 1000
