@@ -241,7 +241,7 @@ function startGame() {
     constructor(game) {
       this.game = game;
       this.x = this.game.width;
-      this.speedX = Math.random() * -25.5 - .5; //move to left
+      this.speedX = Math.random() * -18.5 - .5; //move to left control enemy speed
       this.markedForDeletion = false;
       this.lives = 20
       this.score = this.lives
